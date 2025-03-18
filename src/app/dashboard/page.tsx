@@ -26,7 +26,7 @@ export default function DashboardPage() {
         <div className="flex h-14 items-center border-b px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Brain className="h-6 w-6 text-purple-500" />
-            <span>MindfulMood</span>
+            <span>MindHub</span>
           </Link>
         </div>
         <nav className="flex-1 overflow-auto py-4">
@@ -91,10 +91,12 @@ export default function DashboardPage() {
           </div>
         </nav>
         <div className="mt-auto border-t p-4">
-          <Button variant="outline" className="w-full justify-start gap-2">
-            <LogOut className="h-4 w-4" />
-            Log out
-          </Button>
+          <Link href="/">
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <LogOut className="h-4 w-4" />
+              Log out
+            </Button>
+          </Link>
         </div>
       </aside>
 

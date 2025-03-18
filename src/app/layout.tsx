@@ -36,7 +36,7 @@
 
 import type { Metadata } from 'next'
 import { ThemeProvider } from "@/providers/theme-provider";
-import "@/styles/globals.css"; // Ensure Tailwind styles are imported
+import "../styles/globals.css"; // Ensure Tailwind styles are imported
 
 export const metadata: Metadata = {
   title: 'v0 App',

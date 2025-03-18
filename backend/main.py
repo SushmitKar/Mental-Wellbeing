@@ -9,26 +9,32 @@ app = FastAPI()
 # Enable CORS for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Change this if your frontend is hosted elsewhere
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# MongoDB Connection
 client = MongoClient("mongodb://localhost:27017")
 db = client["mental_health"]
 moods_collection = db["moods"]
 users_collection = db["users"]
 
-class User(BaseModel):
-    username: str
+class UserSignup(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
     password: str
+
+class UserSignin(BaseModel):
+    email: str
+    password: str
+
 # Pydantic Model for Input Validation
 class MoodRequest(BaseModel):
     mood: str
 
-@app.get("/")  # This will fix the 404 error
+@app.get("/")  
 def read_root():
     return {""}
 
@@ -42,31 +48,37 @@ def save_mood(mood_data: MoodRequest):
     
 
 @app.post("/signup")
-def signup(user: User):
+def signup(user: UserSignup):
     # Check if user already exists
-    if users_collection.find_one({"username": user.username}):
-        raise HTTPException(status_code=400, detail="Username already taken")
+    if users_collection.find_one({"email": user.email}):
+        raise HTTPException(status_code=400, detail="Email already registered")
 
     # Hash the password
-    hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     # Store user in DB
-    users_collection.insert_one({"username": user.username, "password": hashed_password})
+    users_collection.insert_one({
+        "firstName": user.firstName,
+        "lastName": user.lastName,
+        "email": user.email,
+        "password": hashed_password
+    })
 
     return {"message": "User registered successfully"}
 
 @app.post("/signin")
-def signin(user: User):
-    # Find user in DB
-    existing_user = users_collection.find_one({"username": user.username})
+def signin(user: UserSignin):
+    # Find user in DB using email instead of username
+    existing_user = users_collection.find_one({"email": user.email})  
 
     if not existing_user:
-        raise HTTPException(status_code=400, detail="Invalid username or password")
+        raise HTTPException(status_code=400, detail="Invalid email or password")
 
     # Verify password
-    if not bcrypt.checkpw(user.password.encode('utf-8'), existing_user["password"]):
-        raise HTTPException(status_code=400, detail="Invalid username or password")
+    if not bcrypt.checkpw(user.password.encode("utf-8"), existing_user["password"].encode("utf-8")):
+        raise HTTPException(status_code=400, detail="Invalid email or password")
 
     return {"message": "Login successful"}
+
     
     

@@ -26,7 +26,7 @@ export default function ProfilePage() {
         <div className="flex h-14 items-center border-b px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <Brain className="h-6 w-6 text-purple-500" />
-            <span>MindfulMood</span>
+            <span>MindHub</span>
           </Link>
         </div>
         <nav className="flex-1 overflow-auto py-4">

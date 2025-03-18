@@ -12,7 +12,7 @@ export default function LandingPage() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Brain className="h-6 w-6 text-purple-500" />
-            <span className="text-xl font-semibold">MindfulMood</span>
+            <span className="text-xl font-semibold">MindHub</span>
           </div>
           <nav className="hidden md:flex gap-6">
             <Link href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground">
@@ -32,7 +32,9 @@ export default function LandingPage() {
               </Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm">Sign Up</Button>
+              <Button size="sm">
+                Sign Up
+              </Button>
             </Link>
           </div>
         </div>
@@ -85,7 +87,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                   Features Designed for Your Mental Wellbeing
                 </h2>
-                <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto">
                   Our platform offers a comprehensive suite of tools to help you track, understand, and improve your
                   mental health.
                 </p>
