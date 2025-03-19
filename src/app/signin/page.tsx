@@ -10,22 +10,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Brain } from "lucide-react";
 
 export default function SignInPage() {
-  const [email, setEmail] = useState(""); // ✅ Change username → email
+  const [email, setEmail] = useState(""); // Change username → email
   const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleSignIn = async () => {
-    const response = await fetch("http://127.0.0.1:8000/signin", {  // ✅ Fix API URL
+    const response = await fetch("http://127.0.0.1:8000/signin", {  //   Fix API URL
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),  // ✅ Change username → email
+      body: JSON.stringify({ email, password }),  // Change username → email
     });
 
     const data = await response.json
 
     if (response.ok) {
       alert("Login Successful!");
-      router.push("/dashboard");  // ✅ Redirects to Dashboard
+      router.push("/dashboard");  // Redirects to Dashboard
     } else {
       const errorData = await response.json();
       alert("Error: " + (errorData.detail || "Invalid email or password"));
@@ -51,7 +51,7 @@ export default function SignInPage() {
                 id="email"
                 type="email"
                 placeholder="hello@example.com"
-                value={email}   // ✅ Connect state to input
+                value={email}   //   Connect state to input
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -65,7 +65,7 @@ export default function SignInPage() {
               <Input
                 id="password"
                 type="password"
-                value={password}   // ✅ Connect state to input
+                value={password}   //   Connect state to input
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
