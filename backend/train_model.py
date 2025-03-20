@@ -1,11 +1,9 @@
 import os
-import tensorflow as tf
-import keras
-from tensorflow import keras
-from keras import image_dataset_from_directory
-from keras import Sequential
-from keras import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
-from keras import Adam
+import tensorflow
+from tensorflow.keras.utils import image_dataset_from_directory
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, Input
+from tensorflow.keras.optimizers import Adam
 
 
 train_dataset = image_dataset_from_directory(
@@ -34,14 +32,44 @@ val_dataset = image_dataset_from_directory(
 )
 
 
-normalization_layer = keras.Rescaling(1./255)
+normalization_layer = tensorflow.keras.layers.Rescaling(1./255)
 
 #Applying normalization to traininga and validating datasets
 train_dataset = train_dataset.map(lambda x,y : (normalization_layer(x), y))
 val_dataset = val_dataset.map(lambda x,y : (normalization_layer(x), y))
 
-#CNN model
-model = Sequential()
+#CNN model  
+model = Sequential([
+    Input(shape=(224, 224, 3)),
+    Conv2D(32, (3, 3), activation='relu'),
+    MaxPooling2D(pool_size=(2, 2)),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D(pool_size=(2, 2)),
+    Conv2D(128, (3, 3), activation='relu'),
+    MaxPooling2D(pool_size=(2, 2)),
+    Flatten(),
+    Dense(128, activation="relu"),
+    Dropout(0.5),
+    Dense(7, activation="softmax")
+])
 
-#Conv layer1
-model.add(Conv2D(32, (3,3)))
+#Compile the model
+model.compile(
+    optimizer=Adam(learning_rate=0.001),
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+
+#Train the model
+EPOCHS = 25
+history= model.fit(
+    train_dataset,
+    validation_data=val_dataset,
+    epochs=EPOCHS
+)
+
+# Save the trained model
+model.save('backend/Mood_Dataset_extracted/emotion_model.keras')
+print('Model Training and Saving Complete') 
+# model.summary()

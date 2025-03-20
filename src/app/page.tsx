@@ -9,11 +9,13 @@ import Home from "./home"
 
 
 function Land() {
-  return(
-    <div>
-      <Home />
-      <LandingPage />
-    </div>
+  return( 
+    <main>
+      <div>
+        <Home />
+        <LandingPage />
+      </div>
+    </main>
   )
 }
 

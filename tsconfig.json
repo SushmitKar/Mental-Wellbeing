@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/mood-tracker/uploadMood.js", "src/components/mood-tracker/MoodHistory.js", "src/components/realtime.js"],
   "exclude": ["node_modules"]
 }

@@ -1,6 +1,9 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import MoodHistory from "@/components/mood-tracker/MoodHistory"
+import UploadMood from "@/components/mood-tracker/uploadMood"
+import WebcamCapture from "@/components/realtime"
 import {
   Brain,
   BarChart3,
@@ -19,6 +22,7 @@ import { MoodChart } from "@/components/mood-tracker/mood-chart"
 import { Badge } from "@/components/ui/badge"
 
 export default function ProfilePage() {
+  const userId = "user123"; // Replace with authenticated user ID
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -156,8 +160,15 @@ export default function ProfilePage() {
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2">
               <Card>
+              <UploadMood />
                 <CardHeader>
-                  <CardTitle>Mood History</CardTitle>
+                      <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+                        <div className="container mx-auto px-4">
+                          <h1 className="text-3xl font-bold mb-6">My Mood History</h1>
+                          <MoodHistory userId={userId} />
+                          <WebcamCapture />
+                        </div>
+                      </main>
                   <CardDescription>Your emotional journey over time</CardDescription>
                 </CardHeader>
                 <CardContent>
