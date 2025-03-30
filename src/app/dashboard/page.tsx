@@ -60,7 +60,7 @@ export default function DashboardPage() {
             <h2 className="mb-2 px-2 text-xs font-semibold tracking-tight">Features</h2>
             <div className="space-y-1">
               <Link
-                href="#"
+                href="/dashboard/mood-tracker"
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
               >
                 <BarChart3 className="h-4 w-4" />

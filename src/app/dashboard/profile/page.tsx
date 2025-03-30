@@ -2,8 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import MoodHistory from "@/components/mood-tracker/MoodHistory"
-import UploadMood from "@/components/mood-tracker/uploadMood"
-import WebcamCapture from "@/components/realtime"
+// import UploadMood from "@/components/mood-tracker/uploadMood"
+// <UploadMood />
 import {
   Brain,
   BarChart3,
@@ -64,7 +64,7 @@ export default function ProfilePage() {
             <h2 className="mb-2 px-2 text-xs font-semibold tracking-tight">Features</h2>
             <div className="space-y-1">
               <Link
-                href="#"
+                href="/dashboard/mood-tracker"
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
               >
                 <BarChart3 className="h-4 w-4" />
@@ -160,13 +160,11 @@ export default function ProfilePage() {
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2">
               <Card>
-              <UploadMood />
                 <CardHeader>
                       <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
                         <div className="container mx-auto px-4">
                           <h1 className="text-3xl font-bold mb-6">My Mood History</h1>
                           <MoodHistory userId={userId} />
-                          <WebcamCapture />
                         </div>
                       </main>
                   <CardDescription>Your emotional journey over time</CardDescription>

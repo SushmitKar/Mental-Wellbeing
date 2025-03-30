@@ -10,25 +10,36 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Brain } from "lucide-react";
 
 export default function SignInPage() {
-  const [email, setEmail] = useState(""); // Change username → email
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleSignIn = async () => {
-    const response = await fetch("http://127.0.0.1:8000/signin", {  //   Fix API URL
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),  // Change username → email
-    });
+    try {
+      const response = await fetch("http://127.0.0.1:8000/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || "Invalid email or password");
+      }
 
-    if (response.ok) {
-      alert("Login Successful!");
-      router.push("/dashboard");  // Redirects to Dashboard
-    } else {
-      const errorData = await response.json();
-      alert("Error: " + (errorData.detail || "Invalid email or password"));
+      const data = await response.json(); // Read once here
+
+      if (response.ok) {
+        alert("Login Successful!");
+        localStorage.setItem("token", data.user.token); // Save token if needed
+        router.push("/dashboard"); // Redirect to Dashboard
+      } else {
+        // Handle error response
+        alert("Error: " + (data.detail || "Invalid email or password"));
+      }
+    } catch (error) {
+      console.error("Error during sign-in:", error);
+      alert("An error occurred. Please try again later.");
     }
   };
 
