@@ -6,5 +6,6 @@ import jwt
 SECRET_KEY = "nraE1z0KE5RMrXEnx6EA"
 def create_token(data: dict):
     payload = data.copy()
-    payload.upload({"exp": datetime.now(timezone.utc) + timedelta(hours=24)})
+    # payload.upload({"exp": datetime.now(timezone.utc) + timedelta(hours=24)})
+    payload.update({"exp": datetime.now(timezone.utc) + timedelta(hours=24)})   
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
