@@ -40,3 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 backend/models/shape_predictor_68_face_landmarks.dat
+backend/models/EmoModel.h5

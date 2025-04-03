@@ -434,7 +434,7 @@ def generate_frames():
 # API Endpoints
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the MindHub API!"}
+    return {"message": ""}
 
 @app.get("/webcam")
 def webcam_feed():
