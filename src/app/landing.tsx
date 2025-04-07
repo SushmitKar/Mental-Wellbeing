@@ -69,10 +69,11 @@ export default function LandingPage() {
               </div>
               <div className="relative h-[350px] w-full rounded-xl overflow-hidden">
                 <Image
-                  src="/placeholder.svg?height=700&width=700"
-                  alt="Mood tracking dashboard preview"
+                  src="/Peace1.png"
+                  alt="Peaceful image"
                   fill
                   className="object-cover"
+                  priority
                 />
               </div>
             </div>
@@ -166,14 +167,44 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl gap-6 py-12 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="bg-white">
+              {[
+                {
+                  name: "Aarav Sharma",
+                  testimonial: "MindHub has been a great support system for me. As someone dealing with work stress and anxiety, having access to professional therapists through chat and video calls has been really helpful. The guided meditation sessions are also a great feature. However, I think the app could improve by offering more regional language support, as not everyone is comfortable communicating in English. Despite that, it has made a positive impact on my mental well-being.",
+                  stars: 5
+                },
+                {
+                  name: "Vikram Patil",
+                  testimonial: "The project is a great initiative, but id want to know if i as a user login to MindHub, will i be able to get a personalized dashboard, resources? Will i be able to contact the professionals if i feel like i have to? What benefits can i get from MindHub? Will my personal information be private? These are some important questions and at least these features must be present in MindHub  for it to be a proper mental health support platform.",
+                  stars: 4
+                },
+                {
+                  name: "Rohan Verma",
+                  testimonial: "I like their idea a lot but what i want to know is how this will be different from existing mental health apps and websites. Will it focus on the self help techniques more or  will it connect users with professionals or will it do both ? How will they make it more engaging than rest of the websites or apps? And i hope there will be an emergency support options as its really important.",
+                  stars: 5
+                },
+                {
+                  name: "Meera Nair",
+                  testimonial: "While the idea of a mental health platform is very common, it is a good initiative and i hope it will provide a personalized experience for each user as it is one of the most important feature a mental health website should have. Also my or any other user's personal information should not be shared with anyone.",
+                  stars: 3                },
+                {
+                  name: "Priya Iyer",
+                  testimonial: "I believe that mental health is a very important issue and that our mental well being plays a very important role in turning us into who we are and what we can achieve. A person with good mental health can achieve anything that they want. So i appreciate that their project MindHub is trying to help those in need. Although i do have a concern about the accessibility and whether this will be free or affordable. If people can connect to professionals with affordable prices or get self help or access to free resources, it will be very valuable. ",
+                  stars: 5
+                },
+                {
+                  name: "Vinayak Mittal",
+                  testimonial: "Well, this is a wonderful concept. Today, mental health websites are so much in demand; if well implemented, this will positively impact a vast number of people. Just some things to highlight—privacy is of utmost importance in this area, so ensure that users' data and chats have the utmost protection. An AI chatbot that carries out sentiment analysis would be a wonderful addition, but the outputs should sound and feel human—not machine-like. If it could detect distress and present an appropriate response, that would pose a revolution. The gamification angle is enticing, but implementing it rightly is crucial. Mental health is not something that one should 'win' at. Instead of points, maybe the reward should be through resources to self-help exercises or guided meditation. Hope to see this enhancement. Keep developing!",
+                  stars: 5
+                }
+              ].map((user, index) => (
+                <Card key={index} className="bg-white">
                   <CardContent className="p-6">
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[...Array(user.stars)].map((_, starIndex) => (
                           <svg
-                            key={star}
+                            key={starIndex}
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"
@@ -189,17 +220,14 @@ export default function LandingPage() {
                           </svg>
                         ))}
                       </div>
-                      <p className="text-muted-foreground">
-                        "MindfulMood has helped me understand my emotional patterns and develop healthier coping
-                        mechanisms. I'm more aware of my triggers and better equipped to handle stress."
-                      </p>
+                      <p className="text-muted-foreground">"{user.testimonial}"</p>
                       <div className="flex items-center gap-4 pt-4">
                         <div className="rounded-full bg-gray-100 p-1">
                           <div className="h-8 w-8 rounded-full bg-gray-300" />
                         </div>
                         <div>
-                          <p className="font-medium">User {i}</p>
-                          <p className="text-sm text-muted-foreground">Using MindfulMood for 6 months</p>
+                          <p className="font-medium">{user.name}</p>
+                          {/* <p className="text-sm text-muted-foreground">{user.duration}</p> */}
                         </div>
                       </div>
                     </div>

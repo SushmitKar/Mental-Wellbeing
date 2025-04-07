@@ -17,6 +17,7 @@ import {
   Upload,
   Edit,
   Menu,
+  Plus,
 } from "lucide-react"
 import { MoodChart } from "@/components/mood-tracker/mood-chart"
 import { Badge } from "@/components/ui/badge"
@@ -71,7 +72,7 @@ export default function ProfilePage() {
                 Mood Tracker
               </Link>
               <Link
-                href="#"
+                href="/dashboard/journal"
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
               >
                 <Calendar className="h-4 w-4" />
@@ -167,12 +168,11 @@ export default function ProfilePage() {
                           <MoodHistory userId={userId} />
                         </div>
                       </main>
-                  <CardDescription>Your emotional journey over time</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[300px]">
+                  {/* <div className="h-[300px]">
                     <MoodChart />
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
             </div>
@@ -225,37 +225,6 @@ export default function ProfilePage() {
                     You've shown consistent improvement in managing stress over the past month. Your anxiety scores have
                     decreased by 15% compared to when you first started.
                   </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Daily Check-in</CardTitle>
-                <CardDescription>How are you feeling today?</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-5 gap-2 mb-4">
-                  {["😢", "😔", "😐", "🙂", "😄"].map((emoji, i) => (
-                    <Button key={i} variant="outline" className="h-12 text-2xl">
-                      {emoji}
-                    </Button>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="journal" className="block text-sm font-medium mb-1">
-                      Journal Entry
-                    </label>
-                    <textarea
-                      id="journal"
-                      className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      placeholder="Write about your day, thoughts, or feelings..."
-                    />
-                  </div>
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700">Save Today's Entry</Button>
                 </div>
               </CardContent>
             </Card>

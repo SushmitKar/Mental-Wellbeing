@@ -49,6 +49,7 @@ client = MongoClient("mongodb://localhost:27017")
 db = client["mental_health"]
 moods_collection = db["moods"]
 users_collection = db["users"]
+journals_collection = db["journals"]
 
 # Initialize Mediapipe Modules
 mp_face_detection = mp.solutions.face_detection
@@ -112,11 +113,38 @@ class UserSignin(BaseModel):
     email: str
     password: str
 
+class JournalEntry(BaseModel):
+    emoji: str
+    text: str
+
+
 class MoodRequest(BaseModel):
     mood: str
 
 # JWT Security
 security = HTTPBearer()
+
+@app.post("/journal")
+def save_journal(entry: JournalEntry, credentials: HTTPAuthorizationCredentials = Depends(security)):
+    user_data = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=["HS256"])
+    user_id = user_data["user_id"]
+
+    journals_collection.insert_one({
+        "user_id": user_id,
+        "emoji": entry.emoji,
+        "text": entry.text,
+        "timestamp": datetime.utcnow()
+    })
+    return {"message": "Journal entry saved"}
+
+@app.get("/journal")
+def get_journals(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    user_data = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=["HS256"])
+    user_id = user_data["user_id"]
+
+    entries = list(journals_collection.find({"user_id": user_id}, {"_id": 0}))
+    return {"journal": entries}
+
 
 # Helper Functions
 def verify_token(credentials: HTTPAuthorizationCredentials):
@@ -175,7 +203,6 @@ def analyze_emotion_ensemble(face_roi):
         print(f"Shape before analyze: {face_roi.shape}")
 
         for model in models:
-            # ✅ Updated to use DeepFace.analyze without 'model_name'
             result = DeepFace.analyze(face_roi, actions=["emotion"], enforce_detection=False, detector_backend="opencv")
 
             if result and len(result) > 0:
@@ -185,7 +212,7 @@ def analyze_emotion_ensemble(face_roi):
         # Get most frequent emotion from models
         if predictions:
             most_common = Counter(predictions).most_common(1)
-            if most_common:  # ✅ Check if the list is not empty
+            if most_common:
                 most_common_emotion, count = most_common[0]
                 return most_common_emotion
             else:
@@ -234,11 +261,11 @@ def analyze_multiple_frames(frame_list):
     # Get most frequent emotion from frames
     if emotions_list:
         most_common = Counter(emotions_list).most_common(1)
-        print(f"Most common result: {most_common}")  # Debug point ✅
+        print(f"Most common result: {most_common}")
         
-        if most_common:  # ✅ Check before unpacking
+        if most_common: 
             most_common_emotion, count = most_common[0]
-            print(f"Unpacked Emotion: {most_common_emotion}, Count: {count}")  # Debug point ✅
+            print(f"Unpacked Emotion: {most_common_emotion}, Count: {count}")
             return most_common_emotion
         else:
             return "Neutral"
@@ -520,14 +547,17 @@ def get_mood_history(credentials: HTTPAuthorizationCredentials = Depends(securit
     token_data = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=["HS256"])
     user_id = token_data["user_id"]
 
-    history = list(moods_collection.find({"user_id": user_id}, {"_id": 0, "timestamp": 1, "mood": 1}))
+    history = list(moods_collection.find({"user_id": user_id}, {"_id": 0, "timestamp": 1, "mood": 1}).sort('timestamp',-1))
+
+    for item in history:
+        item['timestamp'] = item['timestamp'].isoformat()
+
     return {"history": history}
 
 @app.post("/signup")
 def signup(user: UserSignup):
     email = user.email.lower()
-    # Check if user already exists
-    if users_collection.find_one({"email": email}):  # Use lowercase email
+    if users_collection.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     # Hash the password
@@ -537,7 +567,7 @@ def signup(user: UserSignup):
     users_collection.insert_one({
         "firstName": user.firstName,
         "lastName": user.lastName,
-        "email": email,  # ✅ Store lowercase email
+        "email": email,
         "password": hashed_password
     })
 
@@ -572,7 +602,7 @@ def signin(user: UserSignin):
         }
     }
 
-# Function to compute average emotions (can be called at app shutdown or periodically)
+# Function to compute average emotions
 def compute_average_emotions():
     try:
         with open("emotion_log.json", "r") as f:

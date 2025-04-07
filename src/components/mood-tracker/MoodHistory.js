@@ -11,16 +11,19 @@ export default function MoodHistory({ userId }) {
 
   const fetchMoodHistory = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8000/mood_history/${userId}`
-      );
+      const token = localStorage.getItem("token");
+      const response = await fetch(`http://localhost:8000/mood_history/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch mood history");
       }
 
       const data = await response.json();
-      setMoodHistory(data.mood_history);
+      setMoodHistory(data.history); // ✅ This was the main issue
     } catch (error) {
       console.error("Error fetching mood history:", error);
     }
@@ -32,17 +35,19 @@ export default function MoodHistory({ userId }) {
       {moodHistory.length === 0 ? (
         <p>No mood data available yet!</p>
       ) : (
-        <ul className="space-y-2">
-          {moodHistory.map((mood, index) => (
-            <li
-              key={index}
-              className="flex justify-between text-sm p-2 bg-gray-100 rounded-md"
-            >
-              <span>{mood.mood}</span>
-              <span>{new Date(mood.timestamp).toLocaleString()}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="max-h-64 overflow-y-auto pr-2">
+          <ul className="space-y-2">
+            {moodHistory.map((mood, index) => (
+              <li
+                key={index}
+                className="flex justify-between text-sm p-2 bg-gray-100 rounded-md"
+              >
+                <span className="capitalize">{mood.mood}</span>
+                <span>{new Date(mood.timestamp).toLocaleString()}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

@@ -3,9 +3,8 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import "../styles/globals.css"; // Ensure Tailwind styles are imported
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'MindHub',
+  description: 'Mental-Health Website',
 }
 
 export default function RootLayout({

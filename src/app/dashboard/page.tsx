@@ -1,4 +1,7 @@
+'use client'
+
 import Link from "next/link"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,8 +20,66 @@ import {
   Menu,
 } from "lucide-react"
 import { MoodChart } from "@/components/mood-tracker/mood-chart"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
+  // const MyComponent = () => {
+  //   const { data: session } = useSession();
+  
+  //   if (session) {
+  //     console.log("User ID or email:", session.user.email); // or session.user.id if available
+  //   }
+  //   return (
+  //     <div>Welcome {session?.user?.name || "Guest"}</div>
+  //   );
+  // };
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [selectedMood, setSelectedMood] = useState<string | null>(null)
+  const [journalText, setJournalText] = useState("")
+  const handleSaveEntry = async () => {
+    
+    if (!selectedMood || !journalText) {
+      alert("Please select a mood and write something in the journal.");
+      return;
+    }
+  
+    try {
+      setIsSaving(true)
+      const token = localStorage.getItem('token');
+      const response = await fetch("http://localhost:8000/journal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          emoji: selectedMood,
+          text: journalText,
+        }),
+      });
+  
+      if (response.ok) {
+        alert("Journal entry saved!");
+        setSelectedMood(null);
+        setJournalText("");
+      } else {
+        alert("Failed to save entry.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong.");
+    }
+  };
+  
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -67,7 +128,7 @@ export default function DashboardPage() {
                 Mood Tracker
               </Link>
               <Link
-                href="#"
+                href="/dashboard/journal"
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
               >
                 <Calendar className="h-4 w-4" />
@@ -110,12 +171,32 @@ export default function DashboardPage() {
           <div className="w-full flex-1">
             <h1 className="text-lg font-semibold">Dashboard</h1>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <User className="h-5 w-5" />
-            <span className="sr-only">Toggle user menu</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Toggle user menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div className="container py-6 md:py-10">
+          {/* Rest of your dashboard content remains the same */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
@@ -123,16 +204,38 @@ export default function DashboardPage() {
                 <CardDescription>How are you feeling today?</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-5 gap-2">
-                  {["😢", "😔", "😐", "🙂", "😄"].map((emoji, i) => (
-                    <Button key={i} variant="outline" className="h-12 text-2xl">
-                      {emoji}
-                    </Button>
-                  ))}
-                </div>
-                <Button className="mt-4 w-full bg-purple-600 hover:bg-purple-700">
-                  <Plus className="mr-2 h-4 w-4" /> Add Journal Entry
-                </Button>
+              <div className="grid grid-cols-5 gap-2">
+                {["😢", "😔", "😐", "🙂", "😄"].map((emoji, i) => (
+                  <Button 
+                  key={i} 
+                  variant={selectedMood === emoji ? "default" : "outline" }
+                  className="h-12 text-2xl"
+                  onClick={() => setSelectedMood(emoji)}
+                  >
+                    {emoji}
+                  </Button>
+                ))}
+              </div>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="journal" className="block text-sm font-medium mb-1">
+                      Journal Entry
+                    </label>
+                    <textarea
+                      id="journal"
+                      className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder="Write about your day, thoughts, or feelings..."
+                      value={journalText}
+                      onChange={(e) => setJournalText(e.target.value)}
+                    />
+                  </div>
+                  <Button 
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={handleSaveEntry}
+                  >
+                    Save Today's Entry
+                  </Button>
+                </div>  
               </CardContent>
             </Card>
             <Card>

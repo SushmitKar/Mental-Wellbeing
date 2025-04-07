@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import LandingPage from "./landing"
 import Home from "./home"
 
-
 function Land() {
   return( 
     <main>
