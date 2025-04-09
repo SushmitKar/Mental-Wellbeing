@@ -25,6 +25,10 @@ from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pymongo import MongoClient
 from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, EmailStr
+from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 # JWT imports
 from JWTAuth import SECRET_KEY, create_token, jwt
@@ -120,6 +124,28 @@ class JournalEntry(BaseModel):
 
 class MoodRequest(BaseModel):
     mood: str
+
+router = APIRouter()
+
+class ProfileUpdate(BaseModel):
+    user_id : str
+    name : str
+    email : EmailStr
+    bio : str
+
+@router.put("/update_profile")
+async def update_profile(data: ProfileUpdate):
+    result = users_collection.update_one(
+        {"_id": ObjectId(data.user_id)},
+        {"$set":{
+            "name": data.name,
+            "email":data.email,
+            "bio":data.bio
+        }}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found or no changes detected")
+    return {"message": "Profile updated successfully"}
 
 # JWT Security
 security = HTTPBearer()

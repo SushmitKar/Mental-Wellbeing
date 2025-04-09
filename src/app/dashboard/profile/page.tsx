@@ -135,10 +135,12 @@ export default function ProfilePage() {
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
                       <h2 className="text-2xl font-bold">John Doe</h2>
-                      <Button variant="outline" size="sm" className="gap-1">
-                        <Edit className="h-3.5 w-3.5" />
-                        Edit Profile
-                      </Button>
+                      <Link href="/dashboard/profile/edit">
+                        <Button variant="outline" size="sm" className="gap-1">
+                          <Edit className="h-3.5 w-3.5" />
+                          Edit Profile
+                        </Button>
+                      </Link>
                     </div>
                     <p className="text-muted-foreground mb-4">Member since March 2023</p>
                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
