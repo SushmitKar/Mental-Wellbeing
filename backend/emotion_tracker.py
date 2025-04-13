@@ -17,21 +17,19 @@ from scipy.spatial import distance as dist
 from datetime import datetime
 from typing import Dict
 from io import BytesIO
-
+from database import *
+from apimodels import *
 # FastAPI imports
 from fastapi import FastAPI, HTTPException, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pymongo import MongoClient
-from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, EmailStr
-from pymongo import MongoClient
+from notifs import router as notifs_router
 from bson.objectid import ObjectId
 
 # JWT imports
-from JWTAuth import SECRET_KEY, create_token, jwt
+from JWTAuth import *
 
 # Suppress Warnings
 warnings.filterwarnings("ignore")
@@ -42,18 +40,13 @@ app = FastAPI()
 # Enable CORS for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# MongoDB setup
-client = MongoClient("mongodb://localhost:27017")
-db = client["mental_health"]
-moods_collection = db["moods"]
-users_collection = db["users"]
-journals_collection = db["journals"]
+router = APIRouter()
 
 # Initialize Mediapipe Modules
 mp_face_detection = mp.solutions.face_detection
@@ -106,46 +99,34 @@ if not os.path.exists("emotion_log.json"):
     with open("emotion_log.json", "w") as f:
         json.dump([], f)
 
-# Pydantic Models for API
-class UserSignup(BaseModel):
-    firstName: str
-    lastName: str
-    email: str
-    password: str
-
-class UserSignin(BaseModel):
-    email: str
-    password: str
-
-class JournalEntry(BaseModel):
-    emoji: str
-    text: str
 
 
-class MoodRequest(BaseModel):
-    mood: str
+from fastapi import HTTPException
 
-router = APIRouter()
+@app.put("/update_profile")
+def update_profile(data: dict):
+    user_id = data.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
 
-class ProfileUpdate(BaseModel):
-    user_id : str
-    name : str
-    email : EmailStr
-    bio : str
+    # Extract updated fields
+    update_fields = {
+        "firstName": data.get("firstName", ""),
+        "lastName": data.get("lastName", ""),
+        "email": data.get("email", ""),
+        "bio": data.get("bio", "")
+    }
 
-@router.put("/update_profile")
-async def update_profile(data: ProfileUpdate):
     result = users_collection.update_one(
-        {"_id": ObjectId(data.user_id)},
-        {"$set":{
-            "name": data.name,
-            "email":data.email,
-            "bio":data.bio
-        }}
+        {"_id": ObjectId(user_id)},
+        {"$set": update_fields}
     )
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="User not found or no changes detected")
-    return {"message": "Profile updated successfully"}
+
+    if result.modified_count == 1:
+        return {"message": "Profile updated successfully"}
+
+    raise HTTPException(status_code=500, detail="Profile update failed")
+
 
 # JWT Security
 security = HTTPBearer()
@@ -586,18 +567,34 @@ def signup(user: UserSignup):
     if users_collection.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Hash the password
     hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-    # Store user in DB
-    users_collection.insert_one({
+    new_user = {
         "firstName": user.firstName,
         "lastName": user.lastName,
         "email": email,
-        "password": hashed_password
+        "password": hashed_password,
+        "joined" : datetime.utcnow().isoformat()
+    }
+
+    result = users_collection.insert_one(new_user)
+    user_id = str(result.inserted_id)
+
+    token = create_token({
+        "user_id": user_id,
+        "email": email
     })
 
-    return {"message": "User registered successfully"}
+    return {
+        "message": "User registered successfully",
+        "user": {
+            "id": user_id,
+            "firstName": user.firstName,
+            "lastName": user.lastName,
+            "email": email,
+            "token": token
+        }
+    }
 
 @app.post("/signin")
 def signin(user: UserSignin):
@@ -626,6 +623,30 @@ def signin(user: UserSignin):
             "email": existing_user["email"],
             "token": token
         }
+    }
+
+
+@app.get("/get_profile/{user_id}")
+def get_profile(user_id: str):
+    try:
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    first_name = user.get("firstName", "")
+    last_name = user.get("lastName", "")
+    fullname = f"{first_name} {last_name}".strip()
+
+    return {
+        "firstName": first_name,
+        "lastName": last_name,
+        "name": fullname,
+        "email": user.get("email", ""),
+        "bio": user.get("bio", ""),
+        "joined": user.get("joined", "Unknown")
     }
 
 # Function to compute average emotions
@@ -670,3 +691,76 @@ async def shutdown_event():
     compute_average_emotions()
     executor.shutdown()
     cv2.destroyAllWindows()
+
+
+@router.get("/user/settings")
+async def get_user_settings(user=Depends(create_token)):
+    user_data = users_collection.find_one({"_id": ObjectId(user["_id"])})
+    return user_data.get("settings", {})
+
+@router.post("/user/settings")
+async def update_user_settings(data: SettingsUpdate, user=Depends(get_current_user)):
+    users_collection.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$set": {f"settings.{data.setting}": data.value}},
+    )
+    return {"status": "success"}
+
+
+# @router.post("/change_password")
+# async def change_password(data: ChangePassword):
+#     user = users_collection.find_one({"_id": ObjectId(data.user_id)})
+    
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+    
+#     # Check if current password matches
+#     if not bcrypt.checkpw(data.current_password.encode('utf-8'), user['password']):
+#         raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+#     # Hash the new password
+#     hashed_new_password = bcrypt.hashpw(data.new_password.encode('utf-8'), bcrypt.gensalt())
+    
+#     # Update the password in the database
+#     users_collection.update_one(
+#         {"_id": ObjectId(data.user_id)}, 
+#         {"$set": {"password": hashed_new_password}}
+#     )
+    
+#     return {"message": "Password changed successfully"}
+
+
+@router.post("/change_password")
+async def change_password(data: ChangePassword):
+    try:
+        # Convert string user_id to ObjectId
+        user_id = ObjectId(data.user_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid user_id format. {str(e)}")
+
+    # Query the database for the user
+    user = users_collection.find_one({"_id": user_id})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if the current password matches
+    if not bcrypt.checkpw(data.current_password.encode('utf-8'), user['password'].encode('utf-8')):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    # Hash the new password
+    hashed_new_password = bcrypt.hashpw(data.new_password.encode('utf-8'), bcrypt.gensalt())
+    
+    # Update the password in the database
+    users_collection.update_one(
+        {"_id": user_id}, 
+        {"$set": {"password": hashed_new_password.decode('utf-8')}}
+    )
+
+    
+    return {"message": "Password changed successfully"}
+
+app.include_router(router)
+app.include_router(notifs_router, prefix='/api/notifs')
+
+print(app.user_middleware)

@@ -1,5 +1,7 @@
+'use client'
+
 import { useState, useEffect } from "react"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -13,13 +15,14 @@ interface DecodedToken {
   email: string
 }
 
-export default function EditProfilePage() {
+export default function AccountSettingsPage() {
   const router = useRouter()
 
   const [token, setToken] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
-  const [name, setName] = useState("John Doe")
-  const [email, setEmail] = useState("john@example.com")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [email, setEmail] = useState("")  
   const [bio, setBio] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -38,7 +41,8 @@ export default function EditProfilePage() {
         fetch(`http://localhost:8000/get_profile/${decoded.user_id}`)
           .then((res) => res.json())
           .then((data) => {
-            setName(data.name || "")
+            setFirstName(data.firstName || "")
+            setLastName(data.lastName || "")            
             setBio(data.bio || "")
           })
           .catch((err) => console.error("Failed to fetch profile:", err))
@@ -46,7 +50,7 @@ export default function EditProfilePage() {
         console.error("Failed to decode token:", err)
       }
     }
-  }, [])
+  }, [])  
   
 
   const handleSave = async () => {
@@ -61,7 +65,8 @@ export default function EditProfilePage() {
         },
         body: JSON.stringify({
           user_id: userId,
-          name,
+          firstName,
+          lastName,
           email,
           bio,
         }),
@@ -88,10 +93,14 @@ export default function EditProfilePage() {
           <CardTitle>Edit Profile</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium">Name</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
+        <div>
+          <label className="block text-sm font-medium">First Name</label>
+          <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Last Name</label>
+          <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+        </div>
           <div>
             <label className="block text-sm font-medium">Email</label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />

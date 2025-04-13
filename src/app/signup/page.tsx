@@ -27,15 +27,19 @@ export default function SignUpPage() {
         password,
       }),
     });
-
+  
+    const data = await response.json();
+  
     if (response.ok) {
+      // ✅ Save the token to localStorage
+      localStorage.setItem("token", data.user.token); // Adjust key if your backend uses a different field
       alert("Sign up successful!");
       router.push("/dashboard");
     } else {
-      const errorData = await response.json();
-      alert("Error: " + (errorData.detail || "Unknown error"));
+      alert("Error: " + (data.detail || "Unknown error"));
     }
   };
+  
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
