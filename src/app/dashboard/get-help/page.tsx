@@ -1,147 +1,211 @@
 'use client';
 
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import ContactForm from "@/components/ContactForm"; // ✅ Adjust this import if needed
+import { useState } from 'react';
+import AppointmentForm from '@/components/AppointmentForm';
+import Image from 'next/image';
 
-// Animation variant
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number = 1) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" },
-  }),
-};
-
-const therapists = [
-  {
-    name: "Dr. Aisha Mehra",
-    qualification: "Ph.D. Clinical Psychology, 10+ yrs experience",
-    image: "/defaultt.jpg",
-  },
-  {
-    name: "Rohan Gupta",
-    qualification: "M.Sc. Counseling Psychologist, CBT Expert",
-    image: "/defaultt.jpg",
-  },
-  {
-    name: "Dr. Neha Singh",
-    qualification: "Psychiatrist, Specializes in Adolescent Therapy",
-    image: "/defaultt.jpg",
-  },
-  {
-    name: "Meera Desai",
-    qualification: "Therapist & Mindfulness Coach",
-    image: "/defaultt.jpg",
-  },
-  {
-    name: "Dr. Aarav Kapoor",
-    qualification: "Behavioral Therapist, Focus on Stress & Anxiety",
-    image: "/defaultt.jpg",
-  },
-  {
-    name: "Simran Kaur",
-    qualification: "LGBTQ+ Affirmative Therapist, Trauma Specialist",
-    image: "/defaultt.jpg",
-  },
-];
-
-const GetHelpPage = () => {
-  const [selectedTherapist, setSelectedTherapist] = useState<null | typeof therapists[0]>(null);
-
-  // Dummy function for phone call initiation (You can integrate it with actual calling services later)
-  const initiatePhoneCall = (phoneNumber: string) => {
-    alert(`Initiating a call to ${phoneNumber}`);
-    // Here you can integrate with any phone service like Twilio or WebRTC
-  };
+export default function GetHelp() {
+  const [activeTab, setActiveTab] = useState('book');
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#e0f2fe] via-[#fef9ff] to-[#f0fdf4] px-6 py-12 text-gray-800 overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-purple-200 rounded-full opacity-30 blur-3xl -z-10 animate-pulse" />
-      <div className="absolute bottom-10 right-0 w-[400px] h-[400px] bg-pink-100 rounded-full opacity-20 blur-2xl -z-10 animate-pulse delay-1000" />
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Get the Help You Need
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Connect with experienced mental health professionals who are here to support you
+            on your journey to wellness.
+          </p>
+        </div>
 
-      <div className="max-w-6xl mx-auto">
-        <motion.h1
-          className="text-5xl md:text-6xl font-extrabold text-center bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-500 text-transparent bg-clip-text drop-shadow-xl mb-10"
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-        >
-          🧠 Connect with a Professional
-        </motion.h1>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {therapists.map((therapist, i) => (
-            <motion.div
-              key={i}
-              className="bg-white bg-opacity-70 p-6 rounded-3xl shadow-xl text-center border hover:shadow-2xl transition"
-              custom={i}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeInUp}
-            >
-              <Image
-                src={therapist.image}
-                alt={therapist.name}
-                width={100}
-                height={100}
-                className="mx-auto rounded-full mb-4 shadow-md"
-              />
-              <h3 className="text-xl font-bold text-purple-700">{therapist.name}</h3>
-              <p className="text-gray-600 mt-2">{therapist.qualification}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Left Column - Appointment Form */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex space-x-4 mb-6">
               <button
-                onClick={() => setSelectedTherapist(therapist)}
-                className="mt-4 px-5 py-2 bg-purple-600 text-white rounded-full shadow hover:bg-purple-700 transition"
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'book'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setActiveTab('book')}
               >
-                Contact
+                Book Appointment
               </button>
               <button
-                onClick={() => initiatePhoneCall('123-456-7890')} // Pass the actual phone number here
-                className="mt-4 ml-4 px-5 py-2 bg-green-600 text-white rounded-full shadow hover:bg-green-700 transition"
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'emergency'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setActiveTab('emergency')}
               >
-                Phone Call
+                Emergency Help
               </button>
-            </motion.div>
-          ))}
+            </div>
+
+            {activeTab === 'book' ? (
+              <AppointmentForm />
+            ) : (
+              <div className="text-center p-8">
+                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                  Emergency Support
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  If you're in crisis or need immediate support, please contact:
+                </p>
+                <div className="space-y-4">
+                  <a
+                    href="tel:911"
+                    className="block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Emergency Services: 911
+                  </a>
+                  <a
+                    href="tel:988"
+                    className="block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Suicide Prevention Lifeline: 988
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Information */}
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                Why Choose Our Services?
+              </h2>
+              <ul className="space-y-4">
+                <li className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-6 w-6 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Licensed and experienced mental health professionals
+                  </p>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-6 w-6 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Confidential and secure online sessions
+                  </p>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-6 w-6 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Flexible scheduling to fit your needs
+                  </p>
+                </li>
+                <li className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-6 w-6 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Evidence-based therapeutic approaches
+                  </p>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                What to Expect
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">1</span>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Book your appointment at a time that works for you
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">2</span>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Receive confirmation and preparation details
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">3</span>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Connect with your therapist for your session
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">4</span>
+                  </div>
+                  <p className="ml-3 text-gray-600">
+                    Receive follow-up resources and support
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Modal */}
-      <AnimatePresence>
-        {selectedTherapist && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full space-y-4 relative"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-            >
-              <button
-                onClick={() => setSelectedTherapist(null)}
-                className="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-xl"
-              >
-                &times;
-              </button>
-              <h2 className="text-2xl font-semibold text-purple-600">Contact {selectedTherapist.name}</h2>
-              <p className="text-gray-600 text-sm">{selectedTherapist.qualification}</p>
-
-              {/* Inject dynamic contact form here */}
-              <ContactForm therapistId={selectedTherapist.name} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
-};
-
-export default GetHelpPage;
+}

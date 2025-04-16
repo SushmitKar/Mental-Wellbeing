@@ -1,151 +1,127 @@
 'use client'
 
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle
-} from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Brain, User, Calendar, Settings, LogOut, Menu, MessageCircle, BarChart3
-} from "lucide-react"
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
-
-type Patient = {
-    name: string;
-    mood: string;
-    id: string;
-  }
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Bell, Calendar, ClipboardList, Phone, Settings, Users } from "lucide-react";
+import PatientsOverview from './patients';
+import Appointments from './appointments';
+import SessionNotes from './notes';
+import Settings from './settings';
+import Notifications from './notifications';
+import Calls from './calls';
 
 export default function TherapistDashboard() {
-    const [patients, setPatients] = useState<Patient[]>([])
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [activeTab, setActiveTab] = useState('patients');
+  const [therapistData, setTherapistData] = useState<any>(null);
+  const router = useRouter();
 
-//   // Mock data - replace with API call
-//   const patients = [
-//     { name: "John Doe", mood: "🙂", id: "1" },
-//     { name: "Jane Smith", mood: "😔", id: "2" },
-//     { name: "Alex Johnson", mood: "😄", id: "3" },
-//   ]
-
-    useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                const res = await fetch("http://127.0.0.1:8000/patients")
-                const data = await res.json()
-                setPatients(data)
-            } catch(err) {
-                console.error("Failed to fetch patients", err)
-            }
+  useEffect(() => {
+    // Fetch therapist data
+    const fetchTherapistData = async () => {
+      try {
+        const response = await fetch('/api/therapist/profile');
+        if (response.ok) {
+          const data = await response.json();
+          setTherapistData(data);
         }
-        fetchPatients() 
-    }, [])
+      } catch (error) {
+        console.error('Error fetching therapist data:', error);
+      }
+    };
+
+    fetchTherapistData();
+  }, []);
+
+  if (!therapistData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col bg-slate-50 border-r">
-        <div className="flex h-14 items-center border-b px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Brain className="h-6 w-6 text-purple-500" />
-            <span>MindHub</span>
-          </Link>
-        </div>
-        <nav className="flex-1 overflow-auto py-4">
-          <div className="px-4 py-2">
-            <h2 className="mb-2 px-2 text-xs font-semibold tracking-tight">Therapist Panel</h2>
-            <div className="space-y-1">
-              <Link href="/dashboard/therapist" className="flex items-center gap-3 rounded-md bg-purple-100 px-3 py-2 text-sm font-medium text-purple-900 transition-all">
-                <User className="h-4 w-4" />
-                Patients
-              </Link>
-              <Link href="/dashboard/therapist/appoint" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent">
-                <Calendar className="h-4 w-4" />
-                Appointments
-              </Link>
-              <Link href="/dashboard/settings" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent">
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Avatar>
+                <AvatarImage src={therapistData.avatar} />
+                <AvatarFallback>{therapistData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Dr. {therapistData.name}</h1>
+                <p className="text-sm text-gray-500">{therapistData.specialization}</p>
+              </div>
             </div>
+            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+              Back to Dashboard
+            </Button>
           </div>
-        </nav>
-        <div className="mt-auto border-t p-4">
-          <Button variant="outline" className="w-full justify-start gap-2">
-            <LogOut className="h-4 w-4" />
-            Log out
-          </Button>
         </div>
-      </aside>
+      </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="flex h-14 items-center gap-4 border-b bg-white px-4 lg:h-[60px] lg:px-6">
-          <Button variant="outline" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
-          <div className="w-full flex-1">
-            <h1 className="text-lg font-semibold">Therapist Dashboard</h1>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs defaultValue="patients" className="space-y-6">
+          <TabsList className="grid grid-cols-6 gap-4">
+            <TabsTrigger value="patients" className="flex items-center space-x-2">
+              <Users className="h-4 w-4" />
+              <span>Patients</span>
+            </TabsTrigger>
+            <TabsTrigger value="appointments" className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4" />
+              <span>Appointments</span>
+            </TabsTrigger>
+            <TabsTrigger value="notes" className="flex items-center space-x-2">
+              <ClipboardList className="h-4 w-4" />
+              <span>Notes</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center space-x-2">
+              <Bell className="h-4 w-4" />
+              <span>Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger value="calls" className="flex items-center space-x-2">
+              <Phone className="h-4 w-4" />
+              <span>Calls</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="container py-6 md:py-10">
-          <Card>
-            <CardHeader>
-              <CardTitle>Patient Overview</CardTitle>
-              <CardDescription>See mood check-ins and journals</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {patients.map((patient) => (
-                <div
-                  key={patient.id}
-                  className="rounded-lg border p-4 hover:bg-slate-50 transition cursor-pointer"
-                  onClick={() => setSelectedPatient(patient)}
-                >
-                  <h2 className="text-lg font-semibold">{patient.name}</h2>
-                  <p className="text-sm text-muted-foreground">Current Mood: {patient.mood}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <TabsContent value="patients">
+            <PatientsOverview therapistId={therapistData._id} />
+          </TabsContent>
 
-          {selectedPatient && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>{selectedPatient.name}'s Insights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Replace with actual chart/journal data later */}
-                <p className="text-sm text-muted-foreground">
-                  Mood chart and journal summaries will appear here.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+          <TabsContent value="appointments">
+            <Appointments therapistId={therapistData._id} />
+          </TabsContent>
+
+          <TabsContent value="notes">
+            <SessionNotes therapistId={therapistData._id} />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Settings therapistId={therapistData._id} />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <Notifications therapistId={therapistData._id} />
+          </TabsContent>
+
+          <TabsContent value="calls">
+            <Calls therapistId={therapistData._id} />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
-  )
+  );
 }

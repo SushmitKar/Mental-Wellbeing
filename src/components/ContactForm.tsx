@@ -9,28 +9,55 @@ const ContactForm = ({ therapistId }: { therapistId: string }) => {
     message: '',
   });
   const [status, setStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    // Simple validation: check if email is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.name || !formData.email || !formData.message) {
+      return 'All fields are required.';
+    }
+    if (!emailRegex.test(formData.email)) {
+      return 'Please enter a valid email address.';
+    }
+    return '';
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+
+    const error = validateForm();
+    if (error) {
+      setStatus(error);
+      return;
+    }
+
     setStatus("Sending...");
+    setIsSubmitting(true); // Show loading state
 
-    const res = await fetch('http://localhost:8000/contact-professional', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ...formData, therapistId }),
-    });
+    try {
+      const res = await fetch('http://localhost:8000/contact-professional', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...formData, therapistId }),
+      });
 
-    if (res.ok) {
-      setStatus("Message sent!");
-      setFormData({ name: '', email: '', message: '' });
-    } else {
+      if (res.ok) {
+        setStatus("Message sent!");
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        setStatus("Error sending message.");
+      }
+    } catch (error) {
       setStatus("Error sending message.");
+    } finally {
+      setIsSubmitting(false); // Hide loading state after submission
     }
   };
 
@@ -62,8 +89,12 @@ const ContactForm = ({ therapistId }: { therapistId: string }) => {
         onChange={handleChange}
         required
       />
-      <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-        Send Message
+      <button
+        type="submit"
+        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+        disabled={isSubmitting} // Disable button while submitting
+      >
+        {isSubmitting ? "Sending..." : "Send Message"} {/* Change button text based on state */}
       </button>
       <p className="text-sm text-gray-600">{status}</p>
     </form>
