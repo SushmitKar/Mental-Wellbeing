@@ -14,7 +14,7 @@ from collections import Counter
 from deepface import DeepFace
 from concurrent.futures import ThreadPoolExecutor
 from scipy.spatial import distance as dist
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict
 from io import BytesIO
 from database import *
@@ -26,7 +26,10 @@ from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import APIRouter, HTTPException, Depends
 from notifs import router as notifs_router
+from contact import router as contact_router
+from live import router as livekit_router
 from bson.objectid import ObjectId
+
 
 # JWT imports
 from JWTAuth import *
@@ -549,6 +552,7 @@ def save_mood(mood_data: MoodRequest, credentials: HTTPAuthorizationCredentials 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
 
+
 @app.get("/mood_history")
 def get_mood_history(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token_data = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=["HS256"])
@@ -561,6 +565,7 @@ def get_mood_history(credentials: HTTPAuthorizationCredentials = Depends(securit
 
     return {"history": history}
 
+
 @app.post("/signup")
 def signup(user: UserSignup):
     email = user.email.lower()
@@ -569,12 +574,15 @@ def signup(user: UserSignup):
 
     hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
+    role = getattr(user, "role", "customer")
+
     new_user = {
         "firstName": user.firstName,
         "lastName": user.lastName,
         "email": email,
         "password": hashed_password,
-        "joined" : datetime.utcnow().isoformat()
+        "role" : role,
+        "joined": datetime.now(timezone.utc).isoformat()
     }
 
     result = users_collection.insert_one(new_user)
@@ -582,7 +590,8 @@ def signup(user: UserSignup):
 
     token = create_token({
         "user_id": user_id,
-        "email": email
+        "email": email,
+        "role" : user.role
     })
 
     return {
@@ -592,7 +601,8 @@ def signup(user: UserSignup):
             "firstName": user.firstName,
             "lastName": user.lastName,
             "email": email,
-            "token": token
+            "token": token,
+            "role" : role
         }
     }
 
@@ -613,7 +623,6 @@ def signin(user: UserSignin):
         "email": existing_user["email"]
     })
 
-    # Return user info
     return {
         "message": "Login successful",
         "user": {
@@ -621,6 +630,7 @@ def signin(user: UserSignin):
             "firstName": existing_user["firstName"],
             "lastName": existing_user["lastName"],
             "email": existing_user["email"],
+            "role": existing_user.get("role", "customer"),  # default to customer if missing
             "token": token
         }
     }
@@ -648,6 +658,8 @@ def get_profile(user_id: str):
         "bio": user.get("bio", ""),
         "joined": user.get("joined", "Unknown")
     }
+
+
 
 # Function to compute average emotions
 def compute_average_emotions():
@@ -707,29 +719,6 @@ async def update_user_settings(data: SettingsUpdate, user=Depends(get_current_us
     return {"status": "success"}
 
 
-# @router.post("/change_password")
-# async def change_password(data: ChangePassword):
-#     user = users_collection.find_one({"_id": ObjectId(data.user_id)})
-    
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-    
-#     # Check if current password matches
-#     if not bcrypt.checkpw(data.current_password.encode('utf-8'), user['password']):
-#         raise HTTPException(status_code=400, detail="Current password is incorrect")
-    
-#     # Hash the new password
-#     hashed_new_password = bcrypt.hashpw(data.new_password.encode('utf-8'), bcrypt.gensalt())
-    
-#     # Update the password in the database
-#     users_collection.update_one(
-#         {"_id": ObjectId(data.user_id)}, 
-#         {"$set": {"password": hashed_new_password}}
-#     )
-    
-#     return {"message": "Password changed successfully"}
-
-
 @router.post("/change_password")
 async def change_password(data: ChangePassword):
     try:
@@ -757,10 +746,27 @@ async def change_password(data: ChangePassword):
         {"$set": {"password": hashed_new_password.decode('utf-8')}}
     )
 
-    
     return {"message": "Password changed successfully"}
+
+
+@router.get("/patients")
+def get_patients():
+    patients_cursor = users_collection.find({"role": "user"})  # You can adjust this filter
+    patients = []
+    for user in patients_cursor:
+        first_name = user.get("firstName", "")
+        last_name = user.get("lastName", "")
+        fullname = f"{first_name} {last_name}".strip()
+        patients.append({
+            "id": str(user["_id"]),
+            "name": fullname,
+            "mood": user.get("current_mood", "😐")
+        })
+    return patients
+
+
 
 app.include_router(router)
 app.include_router(notifs_router, prefix='/api/notifs')
-
-print(app.user_middleware)
+app.include_router(contact_router, prefix="/api")
+app.include_router(livekit_router)

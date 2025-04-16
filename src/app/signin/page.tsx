@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,13 +13,15 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState("signin");
+  const [role, setRole] = useState("customer");
 
   const handleSignIn = async () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }), // Include the role
       });
 
       if (!response.ok) {
@@ -27,12 +29,18 @@ export default function SignInPage() {
         throw new Error(errorData?.detail || "Invalid email or password");
       }
 
-      const data = await response.json(); // Read once here
+      const data = await response.json();
 
       if (response.ok) {
         alert("Login Successful!");
         localStorage.setItem("token", data.user.token); // Save token if needed
-        router.push("/dashboard"); // Redirect to Dashboard
+        localStorage.setItem("role", data.user.role);
+
+        if(data.user.role === "therapist") {
+          router.push("/dashboard/therapist")
+        }else{
+          router.push("/dashboard")
+        }
       } else {
         // Handle error response
         alert("Error: " + (data.detail || "Invalid email or password"));
@@ -43,6 +51,13 @@ export default function SignInPage() {
     }
   };
 
+  const handleTabSwitch = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  const handleRoleSwitch = (role: string) => {
+    setRole(role);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -56,16 +71,37 @@ export default function SignInPage() {
             <CardDescription>Start your mental wellness journey today!</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Tabs for switching between Customer and Therapist */}
+            <div className="flex justify-center space-x-4 mb-4">
+              <button
+                className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+                  role === "customer" ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-600"}`}
+                onClick={() => handleRoleSwitch("customer")}
+              >
+                Customer
+              </button>
+              <button
+                className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+                  role === "therapist" ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-600"}`}
+                onClick={() => handleRoleSwitch("therapist")}
+              >
+                Therapist
+              </button>
+            </div>
+
+            {/* Email Input */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="hello@example.com"
-                value={email}   //   Connect state to input
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
+            {/* Password Input */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -76,12 +112,14 @@ export default function SignInPage() {
               <Input
                 id="password"
                 type="password"
-                value={password}   //   Connect state to input
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+
+            {/* Sign In Button */}
             <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleSignIn}>
-              Sign In
+              Sign In as {role.charAt(0).toUpperCase() + role.slice(1)}
             </Button>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">

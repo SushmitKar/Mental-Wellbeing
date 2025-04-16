@@ -1,5 +1,6 @@
 'use client'
 
+import { MoodTrendChart } from "./mood-tracker/MoodTrendChart"
 import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -142,6 +143,13 @@ export default function DashboardPage() {
                 Achievements
               </Link>
               <Link
+                href="/dashboard/get-help"
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
+              >
+                <Calendar className="h-4 w-4" />
+                Get Help
+              </Link>
+              <Link
                 href="#"
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
               >
@@ -236,15 +244,6 @@ export default function DashboardPage() {
                     Save Today's Entry
                   </Button>
                 </div>  
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Mood Insights</CardTitle>
-                <CardDescription>Your emotional patterns this week</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <MoodChart />
               </CardContent>
             </Card>
             <Card>

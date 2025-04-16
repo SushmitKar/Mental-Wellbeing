@@ -21,7 +21,7 @@ export default function LandingPage() {
             <Link href="#testimonials" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               Testimonials
             </Link>
-            <Link href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               About
             </Link>
           </nav>
@@ -286,7 +286,7 @@ export default function LandingPage() {
               <h3 className="text-sm font-medium">Product</h3>
               <ul className="flex flex-col gap-2">
                 <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground">
                     Features
                   </Link>
                 </li>
@@ -306,18 +306,8 @@ export default function LandingPage() {
               <h3 className="text-sm font-medium">Company</h3>
               <ul className="flex flex-col gap-2">
                 <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground">
                     About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-sm text-muted-foreground hover:text-foreground">
-                    Careers
                   </Link>
                 </li>
               </ul>

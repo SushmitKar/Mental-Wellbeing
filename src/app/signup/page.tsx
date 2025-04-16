@@ -1,7 +1,7 @@
 'use client'
 
-import { useState  } from "react"
-import { useRouter  } from "next/navigation"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,36 +14,45 @@ export default function SignUpPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"customer" | "therapist">("customer");
   const router = useRouter();
 
   const handleSignUp = async () => {
-    const response = await fetch("http://127.0.0.1:8000/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        firstName,
-        lastName, 
-        email, 
-        password,
-      }),
-    });
+    try {
+      const response = await fetch("http://127.0.0.1:8000/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+          role,
+        }),
+      });
   
-    const data = await response.json();
+      const data = await response.json();
   
-    if (response.ok) {
-      // ✅ Save the token to localStorage
-      localStorage.setItem("token", data.user.token); // Adjust key if your backend uses a different field
-      alert("Sign up successful!");
-      router.push("/dashboard");
-    } else {
-      alert("Error: " + (data.detail || "Unknown error"));
+      if (response.ok) {
+        localStorage.setItem("token", data.user.token);
+        localStorage.setItem("role", data.user.role);
+        alert("Sign up successful!");
+  
+        router.push(
+          data.user.role === "therapist" ? "/dashboard/therapist" : "/dashboard"
+        );
+      } else {
+        alert("Error: " + (data.detail || "Unknown error"));
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+      console.error("Signup error:", error);
     }
-  };
-  
+  };  
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto max-w-sm w-full">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
             <Brain className="h-8 w-8 text-purple-500" />
@@ -51,6 +60,27 @@ export default function SignUpPage() {
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
           <CardDescription>Start your mental wellness journey today!</CardDescription>
         </CardHeader>
+
+        {/* Role Tabs */}
+        <div className="flex justify-center gap-4 pb-2">
+          <button
+            onClick={() => setRole("customer")}
+            className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+              role === "customer" ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-600"
+            }`}
+          >
+            Customer
+          </button>
+          <button
+            onClick={() => setRole("therapist")}
+            className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+              role === "therapist" ? "bg-purple-600 text-white" : "bg-gray-200 text-gray-600"
+            }`}
+          >
+            Therapist
+          </button>
+        </div>
+
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -73,6 +103,7 @@ export default function SignUpPage() {
           <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleSignUp}>
             Create Account
           </Button>
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -81,6 +112,7 @@ export default function SignUpPage() {
               <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
+
           <Button variant="outline" className="w-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +133,7 @@ export default function SignUpPage() {
             Google
           </Button>
         </CardContent>
+
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-center text-sm">
             By creating an account, you agree to our{" "}
