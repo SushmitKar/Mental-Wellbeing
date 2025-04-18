@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+from datetime import datetime
 
 # Pydantic Models for API
 class UserSignup(BaseModel):
@@ -53,12 +54,3 @@ class ContactRequest(BaseModel):
 class TokenRequest(BaseModel):
     user_id: str
     room_name : Optional[str] = None
-
-
-class Appointment(BaseModel):
-    patient_id: str
-    therapist_id: str
-    date: str
-    time: str
-    reason: str
-    status: str = "pending"

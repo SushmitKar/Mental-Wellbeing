@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brain } from "lucide-react";
 
+
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +34,7 @@ export default function SignInPage() {
 
       if (response.ok) {
         alert("Login Successful!");
-        localStorage.setItem("token", data.user.token); // Save token if needed
+        localStorage.setItem("token", data.user.token);
         localStorage.setItem("role", data.user.role);
 
         if(data.user.role === "therapist") {

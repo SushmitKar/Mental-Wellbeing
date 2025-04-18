@@ -31,16 +31,6 @@ import {
 import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
-  // const MyComponent = () => {
-  //   const { data: session } = useSession();
-  
-  //   if (session) {
-  //     console.log("User ID or email:", session.user.email); // or session.user.id if available
-  //   }
-  //   return (
-  //     <div>Welcome {session?.user?.name || "Guest"}</div>
-  //   );
-  // };
 
   const [isSaving, setIsSaving] = useState(false)
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
