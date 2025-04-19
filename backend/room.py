@@ -2,7 +2,6 @@ import asyncio
 import httpx
 from livekit import rtc
 from emotion_tracker import users_collection
-from database import db, client
 
 async def get_livekit_token(user_id: str, room_name: str):
     url = "http://localhost:8000/create-token"

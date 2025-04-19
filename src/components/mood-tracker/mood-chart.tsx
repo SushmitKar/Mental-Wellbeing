@@ -1,6 +1,6 @@
 "use client"
 import { ReactNode } from "react";
-import { Chart, ChartContainer, ChartTooltip, ChartTooltipContent, ChartTooltipItem } from "@/components/ui/chart"
+import { Chart, ChartContainer, ChartTooltipContent, ChartTooltipItem } from "@/components/ui/chart"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 
 // Sample mood data

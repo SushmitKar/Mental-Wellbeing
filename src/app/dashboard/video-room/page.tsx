@@ -4,8 +4,6 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import {
   LiveKitRoom,
   VideoConference,
-  ControlBar,
-  useRoomContext,
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 

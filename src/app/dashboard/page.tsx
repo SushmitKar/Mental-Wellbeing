@@ -1,6 +1,5 @@
 'use client'
 
-import { MoodTrendChart } from "./mood-tracker/MoodTrendChart"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -21,7 +20,6 @@ import {
   Menu,
   Video,
 } from "lucide-react"
-import { MoodChart } from "@/components/mood-tracker/mood-chart"
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from apimodels import SettingsUpdate
-from database import client, users_collection, db
+from database import users_collection
 from bson.objectid import ObjectId
 
 router = APIRouter()

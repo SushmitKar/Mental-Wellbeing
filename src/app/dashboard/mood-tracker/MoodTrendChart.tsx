@@ -62,7 +62,6 @@ import { ReactNode } from "react"
 import {
   Chart,
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent,
   ChartTooltipItem,
 } from "@/components/ui/chart"

@@ -1,8 +1,5 @@
   'use server'
 
-  import { revalidatePath } from "next/cache";
-  import clientPromise from "@/lib/mongodb";
-  import { BSON, ObjectId } from "mongodb";
 
   export async function bookAppointment(therapistId: string, patientId: string, date: string, time: string) {
     try {

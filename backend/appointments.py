@@ -1,9 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from database import appointment_collection, users_collection
 from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel
-from apimodels import AppointmentRequest, AppointmentResponse
+from apimodels import AppointmentRequest
 from bson import ObjectId
 
 router = APIRouter()

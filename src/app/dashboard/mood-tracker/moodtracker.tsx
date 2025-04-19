@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { MoodTrendChart } from "./MoodTrendChart"
-import MoodHistory from "@/components/mood-tracker/MoodHistory"
 
 export default function MoodTracker() {
   const videoRef = useRef<HTMLVideoElement | null>(null)

@@ -6,7 +6,7 @@ def get_recommendations(user_id: str):
     recommendations = [
         {
             "title": "Morning Meditation",
-            "text": "A 10-minute morning meditation could help reduce your anxiety levels."
+            "text": "A 10-minute morning meditation could help reduce your anxietyyyyy levels."
         },
         {
             "title": "Evening Journal",

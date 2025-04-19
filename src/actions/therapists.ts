@@ -1,5 +1,3 @@
-import clientPromise from "@/lib/mongodb";
-
 export async function getTherapists() {
   try {
     const response = await fetch('http://localhost:8000/therapists');

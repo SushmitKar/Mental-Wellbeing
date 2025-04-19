@@ -1,7 +1,5 @@
 from fastapi import APIRouter, HTTPException
 from database import users_collection
-from pydantic import BaseModel
-from typing import List, Optional
 from datetime import datetime
 from apimodels import TherapistProfile
 from bson import ObjectId

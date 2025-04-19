@@ -16,13 +16,12 @@ from concurrent.futures import ThreadPoolExecutor
 from scipy.spatial import distance as dist
 from datetime import datetime, timezone
 from typing import Dict
-from io import BytesIO
 from database import *
 from apimodels import *
 # FastAPI imports
 from fastapi import FastAPI, HTTPException, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import APIRouter, HTTPException, Depends
 from notifs import router as notifs_router
