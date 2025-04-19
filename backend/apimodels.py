@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 # Pydantic Models for API
@@ -54,3 +54,26 @@ class ContactRequest(BaseModel):
 class TokenRequest(BaseModel):
     user_id: str
     room_name : Optional[str] = None
+
+class TherapistProfile(BaseModel):
+    name: str
+    specialization: str
+    bio: str
+    photoUrl: str
+    availableSlots: List[dict]
+
+class AppointmentRequest(BaseModel):
+    therapist_id: str
+    patient_id: str
+    date: str
+    time: str
+    status: str = "pending"
+
+class AppointmentResponse(BaseModel):
+    _id: str
+    therapist_id: str
+    patient_id: str
+    date: str
+    time: str
+    status: str
+    created_at: datetime

@@ -1,18 +1,84 @@
-'use server'
+  'use server'
 
-import { revalidatePath } from "next/cache";
-import clientPromise from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+  import { revalidatePath } from "next/cache";
+  import clientPromise from "@/lib/mongodb";
+  import { BSON, ObjectId } from "mongodb";
 
-export async function bookAppointment(therapistId: string, date: string, time: string) {
-  const client = await clientPromise;
-  await client.db().collection("appointments").insertOne({
-    therapistId: new ObjectId(therapistId),
-    patientId: "user_id_here", // Replace with actual patient ID (from session/cookie/etc)
-    date,
-    time,
-    status: "pending"
-  });
+  export async function bookAppointment(therapistId: string, patientId: string, date: string, time: string) {
+    try {
+      const response = await fetch('http://localhost:8000/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          therapist_id: therapistId,
+          patient_id: patientId,
+          date,
+          time,
+          status: 'pending'
+        }),
+      });
 
-  revalidatePath("/dashboard/patient/appointments");
-}
+      if (!response.ok) {
+        throw new Error('Failed to book appointment');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      throw error;
+    }
+  }
+
+  export async function getTherapistAppointments(therapistId: string) {
+    try {
+      const response = await fetch(`http://localhost:8000/appointments/therapist/${therapistId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch appointments');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      throw error;
+    }
+  }
+
+  export async function updateAppointmentStatus(appointmentId: string, status: 'accepted' | 'rejected' | 'completed') {
+    try {
+      const response = await fetch(`http://localhost:8000/appointments/${appointmentId}/status?status=${status}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json', 
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to update appointment status");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      throw error;
+    }
+  }
+
+  export async function getPatientAppointments(patientId: string) {
+    try {
+      const response = await fetch(`http://localhost:8000/appointments/patient/${patientId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch appointments');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      throw error;
+    }
+  }

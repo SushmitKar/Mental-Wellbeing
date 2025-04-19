@@ -1,17 +1,58 @@
 import clientPromise from "@/lib/mongodb";
 
 export async function getTherapists() {
-  
-  const client = await clientPromise;
-  const db = client.db("mental_health");
+  try {
+    const response = await fetch('http://localhost:8000/therapists');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch therapists');
+    }
 
-  const therapists = await db
-    .collection("users")
-    .find({ role: "therapist" })
-    .toArray();
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching therapists:', error);
+    throw error;
+  }
+}
 
-  return therapists.map((t) => ({
-    ...t,
-    _id: t._id.toString(),
-  }));
+export async function updateTherapistProfile(therapistId: string, profile: {
+  name: string;
+  specialization: string;
+  bio: string;
+  photoUrl: string;
+  availableSlots: { date: string; time: string }[];
+}) {
+  try {
+    const response = await fetch(`http://localhost:8000/therapists/${therapistId}/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profile),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update therapist profile');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating therapist profile:', error);
+    throw error;
+  }
+}
+
+export async function getTherapistSlots(therapistId: string) {
+  try {
+    const response = await fetch(`http://localhost:8000/therapists/${therapistId}/slots`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch therapist slots');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching therapist slots:', error);
+    throw error;
+  }
 }

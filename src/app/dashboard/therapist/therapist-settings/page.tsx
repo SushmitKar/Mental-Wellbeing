@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 import Sidebar from "@/components/sidebar";
+import { updateTherapistProfile } from "@/actions/therapists";
 
 type Profile = {
   name: string;
@@ -12,6 +15,7 @@ type Profile = {
 };
 
 export default function TherapistSettingsPage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile>({
     name: "",
     specialization: "",
@@ -19,25 +23,41 @@ export default function TherapistSettingsPage() {
     photoUrl: "",
     availableSlots: [{ date: "", time: "" }],
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    // Fetch profile data (replace with actual API call)
-    const fetchProfileData = async () => {
-      const profileData = {
-        name: "Dr. John",
-        specialization: "Mental Health Specialist",
-        bio: "Specialist in mental health.",
-        photoUrl: "https://example.com/photo.jpg",
-        availableSlots: [
-          { date: "2025-04-20", time: "10:00 AM" },
-          { date: "2025-04-22", time: "2:00 PM" },
-        ],
-      };
-      setProfile(profileData);
-    };
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/dashboard");
+      return;
+    }
 
-    fetchProfileData();
+    try {
+      const decoded = jwtDecode<{ user_id: string }>(token);
+      fetchProfileData(decoded.user_id);
+    } catch (error) {
+      console.error("Failed to decode token", error);
+      router.push("/dashboard");
+    }
   }, []);
+
+  const fetchProfileData = async (therapistId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/therapists/${therapistId}/profile`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile data");
+      }
+      const data = await response.json();
+      setProfile(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setError("Failed to load profile data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSlotChange = (index: number, field: string, value: string) => {
     const newSlots = [...profile.availableSlots];
@@ -57,10 +77,35 @@ export default function TherapistSettingsPage() {
     setProfile({ ...profile, availableSlots: newSlots });
   };
 
-  const handleProfileUpdate = () => {
-    // Replace with actual API call to update profile data
-    console.log("Profile updated:", profile);
+  const handleProfileUpdate = async () => {
+    try {
+      setError("");
+      setSuccess("");
+      setIsLoading(true);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Please login to update profile");
+      }
+
+      const decoded = jwtDecode<{ user_id: string }>(token);
+      await updateTherapistProfile(decoded.user_id, profile);
+      
+      setSuccess("Profile updated successfully!");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500">
+        Loading profile...
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -77,7 +122,7 @@ export default function TherapistSettingsPage() {
                   type="text"
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
 
@@ -87,7 +132,7 @@ export default function TherapistSettingsPage() {
                   type="text"
                   value={profile.specialization}
                   onChange={(e) => setProfile({ ...profile, specialization: e.target.value })}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
 
@@ -97,7 +142,7 @@ export default function TherapistSettingsPage() {
                   value={profile.bio}
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   rows={4}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
 
@@ -107,7 +152,7 @@ export default function TherapistSettingsPage() {
                   type="text"
                   value={profile.photoUrl}
                   onChange={(e) => setProfile({ ...profile, photoUrl: e.target.value })}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
 
@@ -119,14 +164,14 @@ export default function TherapistSettingsPage() {
                       type="date"
                       value={slot.date}
                       onChange={(e) => handleSlotChange(index, "date", e.target.value)}
-                      className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="p-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+                      min={new Date().toISOString().split('T')[0]}
                     />
                     <input
                       type="time"
                       value={slot.time}
                       onChange={(e) => handleSlotChange(index, "time", e.target.value)}
-                      className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    />
+                      className="p-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"                    />
                     <button
                       onClick={() => removeSlot(index)}
                       className="text-red-600 hover:text-red-800"
@@ -143,11 +188,22 @@ export default function TherapistSettingsPage() {
                 </button>
               </div>
 
+              {error && (
+                <p className="text-red-500 text-sm">{error}</p>
+              )}
+
+              {success && (
+                <p className="text-green-500 text-sm">{success}</p>
+              )}
+
               <button
                 onClick={handleProfileUpdate}
-                className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                disabled={isLoading}
+                className={`w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                Save Changes
+                {isLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

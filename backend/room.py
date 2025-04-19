@@ -5,7 +5,7 @@ from emotion_tracker import users_collection
 from database import db, client
 
 async def get_livekit_token(user_id: str, room_name: str):
-    url = "http://localhost:8000/get-token"
+    url = "http://localhost:8000/create-token"
     payload = {"user_id": user_id, "room_name": room_name}
     
     async with httpx.AsyncClient() as client:

@@ -28,6 +28,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from notifs import router as notifs_router
 from contact import router as contact_router
 from live import router as livekit_router
+from therapists import router as therapist_router
+from appointments import router as appointment_router
 from bson.objectid import ObjectId
 
 
@@ -770,3 +772,5 @@ app.include_router(router)
 app.include_router(notifs_router, prefix='/api/notifs')
 app.include_router(contact_router, prefix="/api")
 app.include_router(livekit_router)
+app.include_router(therapist_router)
+app.include_router(appointment_router)

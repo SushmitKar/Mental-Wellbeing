@@ -69,7 +69,7 @@ const RoomPage = () => {
       onDisconnected={() => {
         console.log("Disconnected from room.")
         setToken(null)
-        router.push("/dashboard/therapist")
+        router.push("/dashboard")
       }}
     >
       <VideoConference />
