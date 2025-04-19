@@ -1,62 +1,3 @@
-# from fastapi import APIRouter, HTTPException
-# from dotenv import load_dotenv
-# from livekit import api
-# from apimodels import TokenRequest
-# import os, uuid, traceback
-
-# load_dotenv()
-
-# router = APIRouter()
-
-# LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY")
-# LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET")
-
-# if not LIVEKIT_API_KEY or not LIVEKIT_API_SECRET:
-#     raise HTTPException(status_code=500, detail="Missing LiveKit API credentials.")
-
-# @router.post("/create-token")
-# async def create_token(req: TokenRequest):
-#     try:
-
-#         print("Request received:", req)
-#         print("Using API_KEY:", LIVEKIT_API_KEY)
-#         print("Using API_SECRET:", LIVEKIT_API_SECRET)
-#         # If room name isn't provided, generate a unique one
-#         room_name = req.room_name or f"appointment_{str(uuid.uuid4())[:8]}"
-#         print("room_name: ", room_name)
-
-#         # Create a VideoGrant for this room
-#         grant = api.VideoGrant(room_join=True, room=room_name)
-
-#         # Generate access token
-#         token = api.AccessToken(
-#             LIVEKIT_API_KEY,
-#             LIVEKIT_API_SECRET,
-#             identity=req.user_id,  # this is unique per user
-#             name=req.user_id       # optional, for display name
-#         )
-#         token.add_grant(grant)
-
-#         return {
-#             "token": token.to_jwt(),
-#             "room": room_name
-#         }
-
-#     except Exception as e:
-#         print("Error creating token:", str(e))
-#         traceback.print_exc()  # ← add this
-#         raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
-
-
-
-
-
-
-
 from fastapi import APIRouter, HTTPException
 from dotenv import load_dotenv
 import os, uuid, time, jwt
@@ -101,7 +42,11 @@ async def create_token(req: TokenRequest):
             "exp": exp,  # Expiration time
             "video": {
                 "room": room_name,
-                "roomJoin": True  # Permission to join the room
+                "roomJoin": True,  # Permission to join the room
+                "roomAdmin": True,  # Permission to manage the room
+                "canPublish": True,  # Permission to publish video/audio
+                "canSubscribe": True,  # Permission to subscribe to others' streams
+                "canPublishData": True,  # Permission to send chat messages
             }
         }
 
