@@ -84,7 +84,7 @@ export default function TherapistCard({ therapist }: TherapistCardProps) {
   };
 
   const handleJoinCall = (appointmentId: string) => {
-    router.push(`/room?appointment=${appointmentId}`);
+    router.push(`/dashboard/video-room?appointment=${appointmentId}`);
   };
 
   const availableTimes = therapist.availableSlots

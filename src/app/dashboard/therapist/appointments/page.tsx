@@ -66,7 +66,7 @@ export default function TherapistAppointmentsPage() {
   };
 
   const joinVideoCall = (appointmentId: string) => {
-    router.push(`/room?appointment=${appointmentId}`);
+    router.push(`/dashboard/video-room?appointment=${appointmentId}`);
   };
 
   if (isLoading) {
