@@ -2,7 +2,7 @@
 
 import { MoodTrendChart } from "./mood-tracker/MoodTrendChart"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,6 +19,7 @@ import {
   Plus,
   ChevronRight,
   Menu,
+  Video,
 } from "lucide-react"
 import { MoodChart } from "@/components/mood-tracker/mood-chart"
 import {
@@ -28,13 +29,49 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "next-auth/react";
+import { getPatientAppointments } from "@/actions/appointments";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation";
+
+interface Appointment {
+  id: string;
+  therapist_id: string;
+  patient_id: string;
+  date: string;
+  time: string;
+  status: string;
+  therapist_name?: string;
+}
 
 export default function DashboardPage() {
-
   const [isSaving, setIsSaving] = useState(false)
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const [journalText, setJournalText] = useState("")
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const router = useRouter()
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const decoded = jwtDecode<{ user_id: string }>(token);
+        const patientId = decoded.user_id;
+        const data = await getPatientAppointments(patientId);
+        setAppointments(data);
+      } catch (err) {
+        console.error("Error fetching appointments:", err);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const handleJoinCall = (appointmentId: string) => {
+    router.push(`/room?appointment=${appointmentId}`);
+  };
+
   const handleSaveEntry = async () => {
     
     if (!selectedMood || !journalText) {
@@ -70,6 +107,9 @@ export default function DashboardPage() {
     }
   };
   
+  const upcomingAppointments = appointments.filter(
+    app => app.status === "accepted" && new Date(app.date) >= new Date()
+  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <div className="flex min-h-screen">
@@ -194,7 +234,6 @@ export default function DashboardPage() {
           </DropdownMenu>
         </div>
         <div className="container py-6 md:py-10">
-          {/* Rest of your dashboard content remains the same */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
@@ -270,6 +309,60 @@ export default function DashboardPage() {
                       <p className="text-xs text-muted-foreground">Tracked your mood for 14 days</p>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50">
+              <CardHeader className="pb-2">
+                <CardTitle>Upcoming Sessions</CardTitle>
+                <CardDescription>Your scheduled therapy sessions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {upcomingAppointments.length > 0 ? (
+                    upcomingAppointments.map((appointment) => (
+                      <div key={appointment.id} className="space-y-4">
+                        <div className="bg-white p-4 rounded-lg shadow-sm">
+                          <div className="flex items-center gap-4">
+                            <div className="rounded-full bg-indigo-100 p-2">
+                              <Calendar className="h-4 w-4 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">
+                                {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {appointment.therapist_name || "Therapist"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white"
+                            onClick={() => handleJoinCall(appointment.id)}
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Join Video Call
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center gap-4">
+                      <div className="rounded-full bg-indigo-100 p-2">
+                        <Calendar className="h-4 w-4 text-indigo-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">No upcoming sessions</p>
+                        <p className="text-xs text-muted-foreground">Book a session to get started</p>
+                      </div>
+                    </div>
+                  )}
+                  <Button 
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                    onClick={() => router.push('/dashboard/get-help')}
+                  >
+                    Book a Session
+                  </Button>
                 </div>
               </CardContent>
             </Card>

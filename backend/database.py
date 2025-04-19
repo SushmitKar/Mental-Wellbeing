@@ -6,7 +6,7 @@ import os
 load_dotenv()
 
 # MongoDB setup
-client = MongoClient(os.getenv("MONGO_URL"))
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client["mental_health"]
 moods_collection = db["moods"]
 users_collection = db["users"]
